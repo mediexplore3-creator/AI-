@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flash AI Shopping Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <main class="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-8 transition-all">
+      <header class="mb-8 text-center">
+        <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Flash AI Shopping Assistant</h1>
+        <p class="mt-2 text-slate-300">Find current prices, sentiment, and a quick buy/wait decision.</p>
+      </header>
+
+      <section id="searchSection" class="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center transition-all duration-500">
+        <form id="searchForm" class="w-full rounded-2xl border border-white/20 bg-white/5 p-4 shadow-2xl backdrop-blur-md">
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <input
+              id="productInput"
+              type="text"
+              placeholder="Search for a product (e.g., Sony WH-1000XM5)"
+              class="w-full rounded-xl border border-white/20 bg-slate-900/70 px-4 py-3 text-base outline-none ring-sky-400 transition focus:ring"
+              required
+            />
+            <button
+              type="submit"
+              class="rounded-xl bg-sky-500 px-6 py-3 font-medium text-slate-950 transition hover:bg-sky-400"
+            >
+              Analyze
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section id="loading" class="hidden py-10 text-center">
+        <div class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-sky-400"></div>
+        <p class="mt-4 text-slate-300">Scanning the web for the best prices...</p>
+      </section>
+
+      <section id="errorBox" class="hidden rounded-2xl border border-rose-400/40 bg-rose-500/10 p-4 text-rose-200"></section>
+
+      <section id="results" class="mt-8 hidden space-y-6">
+        <article class="rounded-2xl border border-white/25 bg-white/10 p-6 shadow-xl backdrop-blur-md">
+          <h2 class="mb-2 text-2xl font-semibold" id="resultProductName">Product</h2>
+          <p class="text-slate-300" id="recommendationText"></p>
+        </article>
+
+        <article class="rounded-2xl border border-white/25 bg-white/10 p-6 shadow-xl backdrop-blur-md">
+          <h3 class="mb-4 text-xl font-semibold">Price Comparison</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <thead>
+                <tr class="border-b border-white/20 text-slate-300">
+                  <th class="px-3 py-2">Store</th>
+                  <th class="px-3 py-2">Price</th>
+                  <th class="px-3 py-2">Link</th>
+                </tr>
+              </thead>
+              <tbody id="priceTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="rounded-2xl border border-white/25 bg-white/10 p-6 shadow-xl backdrop-blur-md">
+          <h3 class="mb-3 text-xl font-semibold">Value Summary</h3>
+          <p class="text-slate-200"><strong>Sentiment:</strong> <span id="sentimentText"></span></p>
+          <p class="mt-3 text-slate-200"><strong>AI Reasoning:</strong> <span id="reasoningText"></span></p>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const searchForm = document.getElementById("searchForm");
+      const searchSection = document.getElementById("searchSection");
+      const productInput = document.getElementById("productInput");
+      const loading = document.getElementById("loading");
+      const errorBox = document.getElementById("errorBox");
+      const results = document.getElementById("results");
+
+      const resultProductName = document.getElementById("resultProductName");
+      const recommendationText = document.getElementById("recommendationText");
+      const priceTableBody = document.getElementById("priceTableBody");
+      const sentimentText = document.getElementById("sentimentText");
+      const reasoningText = document.getElementById("reasoningText");
+
+      const setLoading = (isLoading) => {
+        loading.classList.toggle("hidden", !isLoading);
+      };
+
+      const showError = (message) => {
+        errorBox.textContent = message;
+        errorBox.classList.remove("hidden");
+      };
+
+      const clearError = () => {
+        errorBox.classList.add("hidden");
+        errorBox.textContent = "";
+      };
+
+      const moveSearchToTop = () => {
+        searchSection.classList.remove("flex-1", "items-center", "justify-center");
+        searchSection.classList.add("items-start", "justify-start", "mb-6");
+      };
+
+      const safe = (value, fallback = "N/A") => {
+        if (value === undefined || value === null || value === "") return fallback;
+        return value;
+      };
+
+      const renderResults = (data) => {
+        const rows = Array.isArray(data.priceComparison) ? data.priceComparison : [];
+
+        resultProductName.textContent = safe(data.productName, "Unknown Product");
+
+        const recommendation = data.valueSummary?.recommendation || "No recommendation available";
+        recommendationText.textContent = `Recommendation: ${recommendation}`;
+
+        sentimentText.textContent = safe(data.valueSummary?.sentiment);
+        reasoningText.textContent = safe(data.valueSummary?.reasoning);
+
+        priceTableBody.innerHTML = rows
+          .map((row) => {
+            const store = safe(row.store);
+            const price = safe(row.price);
+            const url = safe(row.url, "");
+            const link = url && url !== "N/A"
+              ? `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-sky-300 underline">Visit</a>`
+              : "N/A";
+
+            return `<tr class="border-b border-white/10">
+              <td class="px-3 py-2">${store}</td>
+              <td class="px-3 py-2">${price}</td>
+              <td class="px-3 py-2">${link}</td>
+            </tr>`;
+          })
+          .join("");
+
+        results.classList.remove("hidden");
+      };
+
+      searchForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const productName = productInput.value.trim();
+        if (!productName) return;
+
+        clearError();
+        results.classList.add("hidden");
+        setLoading(true);
+        moveSearchToTop();
+
+        try {
+          const response = await fetch("/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productName })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Unable to analyze this product.");
+          }
+
+          renderResults(data);
+        } catch (error) {
+          showError(error.message || "Something went wrong. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      });
+    </script>
+  </body>
+</html>
