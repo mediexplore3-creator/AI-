@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Aviator Predictor to forecast multipliers.">
+    <title>Aviator Predictor Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Orbitron', sans-serif; transition: all 0.3s ease-in-out; }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0a0a0a; color: white; }
+
+        .header {
+            width: 100vw; height: 60px; background: linear-gradient(90deg, #ff0000, #ff4d4d);
+            font-size: 21px; font-weight: bold; position: fixed; top: 0; display: flex;
+            justify-content: space-between; align-items: center; box-shadow: 0px 0px 10px #ff0000;
+            z-index: 10; padding: 0 20px;
+        }
+        .header-title { flex: 1; text-align: center; }
+        .header-icon { cursor: pointer; font-size: 24px; color: white; padding: 10px; transition: 0.3s; }
+        .header-icon:hover { color: yellow; text-shadow: 0px 0px 5px yellow; }
+
+        .prediction-box { margin-top: 100px; text-align: center; font-size: 22px; padding: 20px; border-radius: 10px; background: black; box-shadow: 0 0 10px red; width: 300px; }
+
+        .multiplier { font-size: 36px; color: #30d5c8; font-weight: bold; margin-top: 10px; text-shadow: 0px 0px 8px #30d5c8; }
+        .cooldown { font-size: 18px; margin-top: 10px; color: orange; }
+
+        .start-prediction-btn {
+            margin-top: 20px; padding: 12px 25px; font-size: 20px; font-weight: bold; color: white; background: #ff0000;
+            border: none; border-radius: 8px; box-shadow: 0px 0px 10px #ff0000; cursor: pointer; text-transform: uppercase;
+        }
+        .start-prediction-btn:disabled { cursor: not-allowed; background: grey; box-shadow: none; opacity: 0.5; }
+        .start-prediction-btn.hidden { display: none; }
+
+        .drawer {
+          position: fixed;
+          top: 0;
+          width: 280px;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.95);
+          box-shadow: 0 0 10px red;
+          padding: 20px;
+          transition: transform 0.5s ease, opacity 0.3s ease;
+          z-index: 1000;
+          opacity: 0; /* Hide drawer initially */
+}
+       .neon-title {
+         color: #ff00ff; 
+         text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff; 
+       }
+
+        .neon-turquoise {
+         color: #30d5c8;
+         text-shadow: 0 0 5px #30d5c8, 0 0 10px #30d5c8, 0 0 20px #30d5c8, 0 0 30px #30d5c8; 
+}
+       .history-drawer {
+         left: 0;
+         transform: translateX(-100%);
+}
+
+       .contact-drawer {
+         right: 0;
+         transform: translateX(100%);
+}
+
+       .drawer.open {
+         transform: translateX(0);
+         opacity: 1; /* Make drawer visible when open */
+}
+
+       .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Prevent closing on click */
+}
+
+.overlay.show {
+    display: block;
+    opacity: 1;
+    pointer-events: none; /* Ensures overlay is visible but not clickable */
+}
+
+        .close-btn { background: red; color: white; padding: 10px; text-align: center; margin-top: 20px; cursor: pointer; border-radius: 5px; }
+        .close-btn:hover { background: darkred; }
+
+        .history-entry {
+            background: black; padding: 10px; margin: 10px 0; border-radius: 8px; box-shadow: 0 0 10px #39ff14; text-align: center;
+        }
+        .history-entry .multiplier-value { font-size: 22px; color: #39ff14; font-weight: bold; text-shadow: 0px 0px 10px #39ff14; }
+        .history-entry .timestamp { font-size: 14px; color: yellow; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    
+    <div class="overlay" onclick="closeDrawer()"></div>
+   
+    <div class="overlay" onclick="closeDrawer()"></div>
+   
+    <div class="header">
+        <span class="header-icon" onclick="toggleDrawer('history')">📜</span>
+        <div class="header-title">AVIATOR PREDICTOR</div>
+        <span class="header-icon" onclick="toggleDrawer('contact')">📞</span>
+    </div>
+
+    
+    <div class="prediction-box">
+        <div id="prediction-text">Prediction will appear here...</div>
+        <div class="multiplier" id="multiplier">x0.00</div>
+        <div class="cooldown" id="cooldown">Cooldown: 30s</div>
+    </div>
+
+    <button class="start-prediction-btn" id="predict-btn" onclick="startPrediction()">Start Prediction</button>
+
+    <div class="drawer history-drawer" id="history-drawer">
+        <h2 class="neon-title">Prediction History</h2>
+        <div id="history-list"></div>
+        <div class="close-btn" onclick="closeDrawer()">Close</div>
+    </div>
+
+    <div class="drawer contact-drawer" id="contact-drawer">
+        <h2 class="neon-title">Contact Support</h2>
+        <p style="color: yellow;">Email:</p>    
+        <p class="neon-turquoise">support@nitin_aviator.com</p>  
+        <p style="color: yellow;">WhatsApp:</p>  
+        <p class="neon-turquoise">+91 93505-49635</p>  
+        <p style="color: yellow;">Telegram:</p>  
+        <p class="neon-turquoise">@NITIN_CHEATS99</p>  
+        <p style="color: yellow;">Instagram:</p>  
+        <p class="neon-turquoise">@itz_nitin_sharma08</p>  
+        <div class="close-btn" onclick="closeDrawer()">Close</div>
+    </div>
+
+ <script>  
+  let cooldownTimer = 30;
+  let countdownTimer = 10;
+  let isPredicting = false;
+  let cooldownInterval;
+  let countdownInterval;
+
+function startPrediction() {
+  if (isPredicting || document.getElementById("predict-btn").disabled) return;
+  isPredicting = true;
+  document.getElementById("predict-btn").classList.add("hidden");
+  
+  // Ensure only one countdown runs
+  clearInterval(countdownInterval);
+  countdownTimer = 10;
+  document.getElementById("prediction-text").innerText = "Prediction in: " + countdownTimer + "s";
+  
+  countdownInterval = setInterval(() => {
+    countdownTimer--;
+    document.getElementById("prediction-text").innerText = "Prediction in: " + countdownTimer + "s";
+    
+    if (countdownTimer <= 0) {
+      clearInterval(countdownInterval);
+      generatePrediction();
+    }
+  }, 1000);
+}
+
+function generatePrediction() {
+  let multiplierValue = (Math.random() * 4 + 1).toFixed(2);
+  document.getElementById("multiplier").innerText = "x" + multiplierValue;
+  document.getElementById("prediction-text").innerText = "Wait For Next Round...";
+  logMultiplier(multiplierValue);
+  startCooldown();
+}
+
+function startCooldown() {
+  clearInterval(cooldownInterval); // Ensure only one cooldown runs  
+  cooldownTimer = 30;
+  document.getElementById("cooldown").innerText = "Cooldown: " + cooldownTimer + "s";
+  
+  cooldownInterval = setInterval(() => {
+    cooldownTimer--;
+    document.getElementById("cooldown").innerText = "Cooldown: " + cooldownTimer + "s";
+    
+    if (cooldownTimer <= 0) {
+      clearInterval(cooldownInterval);
+      document.getElementById("cooldown").innerText = "You can predict again!";
+      
+      isPredicting = false;
+      let btn = document.getElementById("predict-btn");
+      btn.classList.remove("hidden");
+      btn.disabled = false;
+    }
+  }, 1000);
+}
+
+function logMultiplier(multiplierValue) {
+  let historyList = document.getElementById("history-list");
+  let entry = document.createElement("div");
+  entry.classList.add("history-entry");
+  let now = new Date();
+  entry.innerHTML = `<div class="multiplier-value">x${multiplierValue}</div><div class="timestamp">${now.toLocaleString()}</div>`;
+  historyList.prepend(entry);
+}
+
+function toggleDrawer(type) {
+  let drawer = document.getElementById(`${type}-drawer`);
+  let isOpen = drawer.classList.contains("open");
+  
+  if (!isOpen) {
+    disableInteractions();
+    drawer.classList.add("open");
+    document.querySelector(".overlay").classList.add("show");
+  }
+}
+
+function closeDrawer() {
+  document.querySelectorAll(".drawer").forEach(d => d.classList.remove("open"));
+  document.querySelector(".overlay").classList.remove("show");
+  setTimeout(enableInteractions, 300);
+}
+
+function disableInteractions() {
+  let btn = document.getElementById("predict-btn");
+  let headerIcons = document.querySelectorAll(".header-icon");
+  
+  btn.disabled = true;
+  btn.style.opacity = "0.5";
+  btn.style.pointerEvents = "none";
+  
+  headerIcons.forEach(icon => {
+    icon.style.pointerEvents = "none";
+    icon.style.opacity = "0.3";
+    icon.style.transition = "opacity 0.3s ease";
+  });
+}
+
+function enableInteractions() {
+  let btn = document.getElementById("predict-btn");
+  let headerIcons = document.querySelectorAll(".header-icon");
+  
+  btn.disabled = false;
+  btn.style.opacity = "1";
+  btn.style.pointerEvents = "auto";
+  
+  headerIcons.forEach(icon => {
+    icon.style.pointerEvents = "auto";
+    icon.style.opacity = "1";
+  });
+}
+
+  function logout() {
+    window.location.href = "user_login.html"; // Redirect to the first page on logout
+  }
+  
+  // Prevent Back Navigation
+  window.history.pushState(null, "", window.location.href);
+  window.addEventListener("popstate", function() {
+    window.location.href = "user_login.html";
+  });
+</script>
+</body>
+</html>

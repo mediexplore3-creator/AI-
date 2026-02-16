@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Neon Login</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: black;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            
+        }
+
+        /* Canvas Background */
+        #networkCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Login Container */
+        .login-container {
+            background: #000;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px cyan;
+            text-align: center;
+            width: 340px;
+            position: relative;
+            
+        }
+
+        /* Login Title */
+        h1 {
+    font-size: clamp(24px, 5vw, 50px);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Audiowide', sans-serif;
+    background: linear-gradient(240deg, #ff0000, #ff7300, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 0px 15px cyan;
+    animation: flowingRGB 5s infinite linear;
+    text-align: center;
+    white-space: normal;  /* Allows text to wrap */
+    word-break: break-word;
+}
+
+/* Flowing RGB Effect */
+@keyframes flowingRGB {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Responsive Fixes */
+@media (max-width: 768px) {
+    h2 {
+        font-size: 6vw;
+    }
+}
+
+
+        /* Input Fields */
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 5px;
+            border: 2px solid cyan;
+            background: black;
+            color: cyan;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: #00ffcc;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        /* Neon Button */
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: linear-gradient(80deg, cyan, blue, cyan);
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0px 0px 15px cyan;
+            color: white;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(90deg, purple, blue, cyan);
+            box-shadow: 0px 0px 25px cyan;
+        }
+        .fade-out {
+    animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+        /* Error Message */
+        .error-msg {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="networkCanvas"></canvas>
+
+    <div class="login-container">
+        <h1>Cyber Login</h1>
+        <input type="text" class="input-field" id="username" placeholder="Username">
+        <input type="password" class="input-field" id="password" placeholder="Password">
+        <button class="login-btn" onclick="login()">Login</button>
+        <p class="error-msg" id="errorMessage">Invalid Credentials!</p>
+    </div>
+
+    <script>
+        function login() {
+  const validUsername = "ADMIN";
+  const validPassword = "NITIN";
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const errorMessage = document.getElementById("errorMessage");
+  
+  if (username === validUsername && password === validPassword) {
+    document.body.classList.add("fade-out"); // Trigger fade effect
+    setTimeout(() => {
+      window.location.href = "super-admin.html";
+    }, 1000); // Match animation duration
+  } else {
+    errorMessage.style.display = "block";
+  }
+}
+        /* Optimized Network Polygon Effect */
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const maxParticles = 80; // Reduced for better performance
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.radius = Math.random() * 2 + 1;
+                this.dx = Math.random() - 0.5;
+                this.dy = Math.random() - 0.5;
+            }
+
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
+
+                if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'cyan';
+                ctx.fill();
+            }
+        }
+
+        function createParticles() {
+            for (let i = 0; i < maxParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function drawLines() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = "rgba(0, 255, 255, 0.2)";
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let particle of particles) {
+                particle.update();
+                particle.draw();
+            }
+
+            drawLines();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles.length = 0;
+            createParticles();
+        });
+
+        createParticles();
+        animate();
+    </script>
+
+</body>
+</html>

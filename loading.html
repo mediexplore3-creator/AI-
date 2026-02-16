@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Loading</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+        /* Full-screen styling */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            overflow: hidden;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        /* Cyberpunk Grid */
+        .grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.3;
+            animation: gridFade 3s infinite alternate;
+        }
+
+        @keyframes gridFade {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: cyan;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: float 6s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-100px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-200px) scale(1); opacity: 0; }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            width: 380px;
+            height: 792px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid cyan;
+            box-shadow: 0 0 20px cyan, 0 0 40px cyan, 0 0 60px cyan;
+            border-radius: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            transition: transform 1.5s ease-in-out, opacity 1.5s ease-in-out;
+        }
+
+        /* Neon Spinner */
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(0, 255, 255, 0.3);
+            border-top: 5px solid cyan;
+            border-radius: 50%;
+            animation: spin 1s linear infinite , glow 3s infinite alternate;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Loading Text Animation */
+        .loading-text span {
+            font-size: 24px;
+            text-transform: uppercase;
+            color: cyan;
+            text-shadow: 0 0 10px lightcyan, 0 0 20px cyan;
+            opacity: 0;
+            animation: fadeInText 1.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeInText {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Smooth Fade-out */
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Cyberpunk Grid -->
+    <div class="grid"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Loading screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="spinner"></div>
+        <div class="loading-text">
+            <span>L</span>
+            <span>O</span>
+            <span>A</span>
+            <span>D</span>
+            <span>I</span>
+            <span>N</span>
+            <span>G</span>
+            <span>.</span>
+            <span>.</span>
+            <span>.</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Apply staggered text animation
+            document.querySelectorAll(".loading-text span").forEach((letter, index) => {
+                letter.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Generate floating particles
+            const particleContainer = document.getElementById("particles");
+            
+            for (let i = 0; i < 20; i++) {
+                let particle = document.createElement("div");
+                particle.classList.add("particle");
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.top = `${Math.random() * 100}vh`;
+                particle.style.animationDuration = `${3 + Math.random() * 3}s`;
+                particleContainer.appendChild(particle);
+            }
+
+            // Smooth Fade-Out and Redirect
+            setTimeout(() => {
+                document.body.classList.add('fade-out');
+                document.getElementById('loadingScreen').classList.add('fade-out');
+                document.querySelector('.grid').classList.add('fade-out');
+                document.querySelector('.particles').classList.add('fade-out');
+
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 1500);
+            }, 8000);
+        });
+    
+    
+    // Prevent Back Navigation
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", function () {
+        window.location.href = "user_login.html";
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Aviator Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1bRRidVuc5T4WuH_b_D7s3ncCk0e6o4k",
+            authDomain: "superadminpanel-2757.firebaseapp.com",
+            databaseURL: "https://superadminpanel-2757-default-rtdb.firebaseio.com",
+            projectId: "superadminpanel-2757",
+            storageBucket: "superadminpanel-2757.appspot.com",
+            messagingSenderId: "220202072359",
+            appId: "1:220202072359:web:2b6e25819406c478fa1102",
+            measurementId: "G-RX382CMBGZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function validateLogin() {
+            const username = document.getElementById("username").value.trim();
+            const key = document.getElementById("password").value.trim();
+
+            if (!username || !key) {
+                alert("Please enter both Username and Key!");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "keys", key);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    if (data.username !== username) {
+                        alert("Invalid Username for this Key!");
+                        return;
+                    }
+
+                    const expiryDate = new Date(data.expiry);
+                    const currentDate = new Date();
+
+                    if (currentDate > expiryDate) {
+                        alert("Key Expired! Contact Admin.");
+                        return;
+                    }
+
+                    showToast("Key Successful!");
+                    setTimeout(() => fadeOutAndRedirect("home.html"), 2500);
+                } else {
+                    alert("Invalid Key! Contact Admin.");
+                }
+            } catch (error) {
+                console.error("Error logging in:", error);
+                alert("An error occurred. Please try again.");
+            }
+        }
+
+        function redirectToTelegram() {
+            showToast("Share Your Payment Proof Screenshot To Owner Telegram");
+            setTimeout(() => fadeOutAndRedirect("https://t.me/NITIN_CHEATS99"), 2500);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.classList.add("show");
+
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 2500);
+        }
+
+        function fadeOutAndRedirect(url) {
+            document.body.classList.add("fade-out");
+            setTimeout(() => {
+                window.location.href = url;
+            }, 2000);
+        }
+
+        window.onload = function() {
+            document.body.classList.add("fade-in");
+        };
+
+        window.validateLogin = validateLogin;
+        window.redirectToTelegram = redirectToTelegram;
+    </script>
+    <style>
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif; transition: all 0.3s ease-in-out;
+        }
+        
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; background: #0a0a0a; color: white;
+            opacity: 0; transition: opacity 1s ease-in-out;
+        }
+
+        .fade-in { opacity: 1; }
+        .fade-out { opacity: 0; }
+
+        .box {
+            text-align: center; padding: 20px; border-radius: 10px;
+            background: black; box-shadow: 0 0 10px red; width: 320px;
+        }
+
+        h2 {
+            margin-bottom: 20px; font-size: 24px; text-shadow: 0px 0px 5px #ff0000;
+        }
+
+        input {
+            width: 100%; padding: 10px; margin: 10px 0;
+            border: none; border-radius: 5px; font-size: 18px;
+            text-align: center;
+        }
+
+        .btn {
+            width: 100%; padding: 12px; font-size: 18px;
+            background: red; color: white; border: none;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+            box-shadow: 0px 0px 10px #ff0000;
+            margin-top: 10px;
+        }
+
+        .btn:hover { background: darkred; }
+
+        .toast {
+            visibility: hidden;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 0, 0.8);
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            min-width: 350px;
+            box-shadow: 0 0 15px #00ff00;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .keybox-p1 { color: lawngreen; }
+        .keybox-p2 { color: yellow; }
+
+        #buyKeyBox { display: none; }
+    </style>
+    <script>
+        function showBuyKey() {
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("buyKeyBox").style.display = "block";
+        }
+
+        function showLogin() {
+            document.getElementById("buyKeyBox").style.display = "none";
+            document.getElementById("loginBox").style.display = "block";
+        }
+    
+      // Prevent Back Navigation
+        window.history.pushState(null, "", window.location.href);
+        window.addEventListener("popstate", function() {
+       window.location.href = "user_login.html";
+  });
+</script>
+</head>
+<body>
+
+    <div class="box" id="loginBox">
+        <h2>Login to Aviator Predictor</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Enter Key" required>
+        <button class="btn" onclick="validateLogin()">Login</button>
+        <button class="btn" onclick="showBuyKey()">Buy Key</button>
+
+        <div id="toast" class="toast">Key Successful!</div>
+    </div>
+
+    <div class="box" id="buyKeyBox">
+        <h2>Scan & Pay via UPI</h2>
+        <img src="https://i.postimg.cc/DzgN4pnY/In-Shot-20250319-222745648.jpg" alt="QR Code" style="width: 250px; height: 280px;">
+        <p class="keybox-p1"><strong>UPI ID:</strong></p>
+        <p class="keybox-p2"><strong>sukesh275726@okhdfcbank</strong></p>
+        <button class="btn" onclick="redirectToTelegram()">Submit Payment</button>
+        <button class="btn" onclick="showLogin()">Back to Login</button>
+    </div>
+
+</body>
+</html>
